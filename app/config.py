@@ -8,8 +8,8 @@ log = logging.getLogger("uvicorn")
 
 class Settings(BaseSettings):
     environment: str = "dev"
-    testing: bool = 0
-    database_url: AnyUrl = None
+    testing: bool = False
+    database_url: AnyUrl = "postgres://postgres:postgres@web-db:5432/web_dev"
 
 
 @lru_cache()
