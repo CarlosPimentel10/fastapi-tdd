@@ -1,43 +1,45 @@
-import os
 import logging
 
 from fastapi import FastAPI
 from tortoise import Tortoise, run_async
 from tortoise.contrib.fastapi import register_tortoise
+
 from app.config import get_settings
 
 log = logging.getLogger("uvicorn")
 
-settings = get_settings()
 
-DATABASE_URL = settings.test_database_url if settings.testing else settings.database_url
+def get_tortoise_config():
+    settings = get_settings()
 
-if not DATABASE_URL:
-    raise RuntimeError("DATABASE_URL is not set")
+    database_url = settings.test_database_url if settings.testing else settings.database_url
 
-TORTOISE_ORM = {
-    "connections": {"default": DATABASE_URL},
-    "apps": {
-        "models": {
-            "models": ["app.models.tortoise", "aerich.models"],
-            "default_connection": "default",
+    if not database_url:
+        raise RuntimeError("DATABASE_URL is not set")
+
+    return {
+        "connections": {"default": database_url},
+        "apps": {
+            "models": {
+                "models": ["app.models.tortoise", "aerich.models"],
+                "default_connection": "default",
+            },
         },
-    },
-}
+    }
 
 
-def init_db(app: FastAPI) -> None:
+def init_db(app: FastAPI, generate_schemas: bool = False) -> None:
     register_tortoise(
         app,
-        config=TORTOISE_ORM,
-        generate_schemas=False,
+        config=get_tortoise_config(),
+        generate_schemas=generate_schemas,
         add_exception_handlers=True,
     )
 
 
 async def generate_schema() -> None:
     log.info("Initializing Tortoise...")
-    await Tortoise.init(config=TORTOISE_ORM)
+    await Tortoise.init(config=get_tortoise_config())
 
     log.info("Generating database schema via Tortoise...")
     await Tortoise.generate_schemas()
