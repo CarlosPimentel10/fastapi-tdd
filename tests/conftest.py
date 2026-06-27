@@ -3,7 +3,7 @@ import os
 import pytest
 from starlette.testclient import TestClient
 
-from app.config import get_settings, Settings
+from app.config import Settings, get_settings
 from app.db import init_db
 from app.main import create_application
 

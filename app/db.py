@@ -12,7 +12,9 @@ log = logging.getLogger("uvicorn")
 def get_tortoise_config():
     settings = get_settings()
 
-    database_url = settings.test_database_url if settings.testing else settings.database_url
+    database_url = (
+        settings.test_database_url if settings.testing else settings.database_url
+    )
 
     if not database_url:
         raise RuntimeError("DATABASE_URL is not set")
